@@ -19,42 +19,8 @@ RUN LANG="C.UTF-8" \
         git \
         make \
         unzip \
-        # The tools in this package are used when installing packages for Python
-        build-essential \
-        swig3.0 \
-        # Required for Microsoft SQL Server
-        unixodbc-dev \
-        # Required for PostgreSQL
-        libpq-dev \
         # Required for mysqlclient
         default-libmysqlclient-dev \
-        # Required for ts
-        moreutils \
-        rsync \
-        zip \
-        libgdiplus \
-        jq \
-        # By default pip is not available in the buildpacks image
-        python-pip-whl \
-        python3-pip \
-        #.NET Core related pre-requisites
-        libc6 \
-        libgcc1 \
-        libgssapi-krb5-2 \
-        libncurses5 \
-        liblttng-ust0 \
-        libssl-dev \
-        libstdc++6 \
-        zlib1g \
-        libuuid1 \
-        libunwind8 \
-        sqlite3 \
-        libsqlite3-dev \
-        software-properties-common \
-        tk-dev \
-        uuid-dev \
-        curl \
-        gettext \
     && rm -rf /var/lib/apt/lists/* \
     # This is the folder containing 'links' to benv and build script generator
     && apt-get update \
@@ -64,7 +30,7 @@ RUN LANG="C.UTF-8" \
 
 # Verify expected build and debug tools are present
 RUN apt-get update \
-    && apt-get -y install build-essential cmake cppcheck valgrind clang lldb llvm gdb python3-dev \
+    && apt-get -y install build-essential cmake cppcheck valgrind clang lldb llvm gdb \
     # Install tools and shells not in common script
     && apt-get install -yq vim vim-doc xtail software-properties-common libsecret-1-dev \
     # Install additional tools (useful for 'puppeteer' project)
