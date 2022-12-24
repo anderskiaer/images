@@ -8,6 +8,7 @@ USERNAME="codespace"
 USER_UID="1000"
 USER_GID="1000"
 
+group_name="${USERNAME}"
 # User exists, update if needed
     if [ "${USER_GID}" != "automatic" ] && [ "$USER_GID" != "$(id -g $USERNAME)" ]; then 
         group_name="$(id -gn $USERNAME)"
