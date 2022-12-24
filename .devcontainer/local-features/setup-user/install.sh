@@ -4,7 +4,20 @@
 # Licensed under the MIT License. See https://go.microsoft.com/fwlink/?linkid=2090316 for license information.
 #-------------------------------------------------------------------------------------------------------------
 
-USERNAME=${USERNAME:-"codespace"}
+USERNAME="codespace"
+USER_UID="1000"
+USER_GID="1000"
+
+# User exists, update if needed
+    if [ "${USER_GID}" != "automatic" ] && [ "$USER_GID" != "$(id -g $USERNAME)" ]; then 
+        group_name="$(id -gn $USERNAME)"
+        groupmod --gid $USER_GID ${group_name}
+        usermod --gid $USER_GID $USERNAME
+    fi
+    if [ "${USER_UID}" != "automatic" ] && [ "$USER_UID" != "$(id -u $USERNAME)" ]; then 
+        usermod --uid $USER_UID $USERNAME
+    fi
+
 
 set -eux
 
