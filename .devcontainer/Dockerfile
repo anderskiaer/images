@@ -16,6 +16,7 @@ RUN LANG="C.UTF-8" \
     && apt-get update \
     && apt-get upgrade -y \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        software-properties-common \
         git \
         make \
         unzip \
