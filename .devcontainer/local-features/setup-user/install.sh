@@ -8,16 +8,14 @@ USERNAME="codespace"
 USER_UID="1000"
 USER_GID="1000"
 
-group_name="${USERNAME}"
-# User exists, update if needed
-    if [ "${USER_GID}" != "automatic" ] && [ "$USER_GID" != "$(id -g $USERNAME)" ]; then 
-        group_name="$(id -gn $USERNAME)"
-        groupmod --gid $USER_GID ${group_name}
-        usermod --gid $USER_GID $USERNAME
-    fi
-    if [ "${USER_UID}" != "automatic" ] && [ "$USER_UID" != "$(id -u $USERNAME)" ]; then 
-        usermod --uid $USER_UID $USERNAME
-    fi
+# Create user
+groupadd --gid $USER_GID $USERNAME
+useradd -s /bin/bash --uid $USER_UID --gid $USERNAME -m $USERNAME
+    
+# Add add sudo support for non-root user
+echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME
+chmod 0440 /etc/sudoers.d/$USERNAME
+EXISTING_NON_ROOT_USER="${USERNAME}"
 
 
 set -eux
