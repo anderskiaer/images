@@ -4,14 +4,8 @@
         "context": "."
     },
     "features": {
-        "ghcr.io/devcontainers/features/common-utils:1": {
-            "username": "codespace",
-            "uid": "1000",
-            "gid": "1000"
-        },
         "ghcr.io/devcontainers/features/node:1": {
-            "version": "16",
-            "additionalVersions": "14"
+            "version": "16"
         },
         "ghcr.io/devcontainers/features/docker-in-docker:2": {
             "version": "latest"
@@ -19,7 +13,6 @@
         "./local-features/setup-user": "latest"
     },
     "overrideFeatureInstallOrder": [
-        "ghcr.io/devcontainers/features/common-utils",
         "ghcr.io/devcontainers/features/node",
         "ghcr.io/devcontainers/features/docker-in-docker",
         "./local-features/setup-user"
