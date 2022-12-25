@@ -27,11 +27,9 @@
     "customizations": {
         // Configure properties specific to VS Code.
         "vscode": {
-            // Set *default* container specific settings.json values on container create.
             "settings": {
-                "lldb.executable": "/usr/bin/lldb"
+                "workbench.colorTheme": "Default Dark+"
             },
-            // Add the IDs of extensions you want installed when the container is created.
             "extensions": [
                 "GitHub.vscode-pull-request-github"
             ]
