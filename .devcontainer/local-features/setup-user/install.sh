@@ -31,7 +31,6 @@ install_debian_packages() {
     local package_list="apt-utils \
         locales \
         sudo \
-        ncdu \
         git \
         init-system-helpers"
 
@@ -39,14 +38,7 @@ install_debian_packages() {
     echo "Packages to verify are installed: ${package_list}"
     rm -rf /var/lib/apt/lists/*
     apt-get update -y
-    apt-get -y install --no-install-recommends ${package_list} 2> >( grep -v 'debconf: delaying package configuration, since apt-utils is not installed' >&2 )
-
-    # Ensure at least the en_US.UTF-8 UTF-8 locale is available = common need for both applications and things like the agnoster ZSH theme.
-    if [ "${LOCALE_ALREADY_SET}" != "true" ] && ! grep -o -E '^\s*en_US.UTF-8\s+UTF-8' /etc/locale.gen > /dev/null; then
-        echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen 
-        locale-gen
-        LOCALE_ALREADY_SET="true"
-    fi
+    apt-get -y install --no-install-recommends ${package_list}
 
     # Clean up
     apt-get -y clean 
@@ -132,45 +124,15 @@ fi
 # ** Shell customization section **
 # *********************************
 
-if [ "${USERNAME}" = "root" ]; then 
-    user_rc_path="/root"
-else
-    user_rc_path="/home/${USERNAME}"
-fi
+user_rc_path="/home/${USERNAME}"
 
-# Restore user .bashrc / .profile / .zshrc defaults from skeleton file if it doesn't exist or is empty
-possible_rc_files=( ".bashrc" ".profile" ".zshrc" )
-for rc_file in "${possible_rc_files[@]}"; do
-    if [ -f "/etc/skel/${rc_file}" ]; then
-        if [ ! -e "${user_rc_path}/${rc_file}" ] || [ -s "${user_rc_path}/${rc_file}" ]; then
-            cp "/etc/skel/${rc_file}" "${user_rc_path}/${rc_file}"
-            chown ${USERNAME}:${group_name} "${user_rc_path}/${rc_file}"
-        fi
-    fi
-done
 
-# Add RC snippet and custom bash prompt
-if [ "${RC_SNIPPET_ALREADY_ADDED}" != "true" ]; then
-    case "${ADJUSTED_ID}" in
-        "debian")
-            global_rc_path="/etc/bash.bashrc"
-            ;;
-        "rhel")
-            global_rc_path="/etc/bashrc"
-            ;;
-        "alpine")
-            global_rc_path="/etc/bash/bashrc"
-            ;;
-    esac
-    cat "${FEATURE_DIR}/scripts/rc_snippet.sh" >> ${global_rc_path}
-    cat "${FEATURE_DIR}/scripts/bash_theme_snippet.sh" >> "${user_rc_path}/.bashrc"
-    if [ "${USERNAME}" != "root" ]; then
-        cat "${FEATURE_DIR}/scripts/bash_theme_snippet.sh" >> "/root/.bashrc"
-        chown ${USERNAME}:${group_name} "${user_rc_path}/.bashrc"
-    fi
-    RC_SNIPPET_ALREADY_ADDED="true"
-fi
-
+global_rc_path="/etc/bash.bashrc"
+cat "${FEATURE_DIR}/scripts/rc_snippet.sh" >> ${global_rc_path}
+cat "${FEATURE_DIR}/scripts/bash_theme_snippet.sh" >> "${user_rc_path}/.bashrc"
+cat "${FEATURE_DIR}/scripts/bash_theme_snippet.sh" >> "/root/.bashrc"
+chown ${USERNAME}:${group_name} "${user_rc_path}/.bashrc"
+RC_SNIPPET_ALREADY_ADDED="true"
 
 # ****************************
 # ** Utilities and commands **
