@@ -10,18 +10,7 @@ USER_GID="1000"
 
 set -e
 
-MARKER_FILE="/usr/local/etc/vscode-dev-containers/common"
-
 FEATURE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-
-
-# Load markers to see which steps have already run
-if [ -f "${MARKER_FILE}" ]; then
-    echo "Marker file found:"
-    cat "${MARKER_FILE}"
-    source "${MARKER_FILE}"
-fi
-
 
 # Bring in ID, ID_LIKE, VERSION_ID, VERSION_CODENAME
 . /etc/os-release
@@ -71,11 +60,6 @@ RC_SNIPPET_ALREADY_ADDED="true"
 # ****************************
 # ** Utilities and commands **
 # ****************************
-
-# Write marker file
-if [ ! -d "/usr/local/etc/vscode-dev-containers" ]; then
-    mkdir -p "$(dirname "${MARKER_FILE}")"
-fi
 
 HOME_DIR="/home/${USERNAME}/"
 chown -R ${USERNAME}:${USERNAME} ${HOME_DIR}
