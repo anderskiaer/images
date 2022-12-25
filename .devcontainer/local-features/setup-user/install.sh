@@ -14,27 +14,6 @@ MARKER_FILE="/usr/local/etc/vscode-dev-containers/common"
 
 FEATURE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-# Debian / Ubuntu packages
-install_debian_packages() {
-    # Ensure apt is in non-interactive to avoid prompts
-    export DEBIAN_FRONTEND=noninteractive
-
-    local package_list="apt-utils \
-        locales \
-        sudo \
-        git \
-        init-system-helpers"
-
-    # Install the list of packages
-    echo "Packages to verify are installed: ${package_list}"
-    rm -rf /var/lib/apt/lists/*
-    apt-get update -y
-    apt-get -y install --no-install-recommends ${package_list}
-
-    # Clean up
-    apt-get -y clean 
-    rm -rf /var/lib/apt/lists/*
-}
 
 # Load markers to see which steps have already run
 if [ -f "${MARKER_FILE}" ]; then
@@ -43,40 +22,29 @@ if [ -f "${MARKER_FILE}" ]; then
     source "${MARKER_FILE}"
 fi
 
-# Ensure that login shells get the correct path if the user updated the PATH using ENV.
-rm -f /etc/profile.d/00-restore-env.sh
-echo "export PATH=${PATH//$(sh -lc 'echo $PATH')/\$PATH}" > /etc/profile.d/00-restore-env.sh
-chmod +x /etc/profile.d/00-restore-env.sh
 
 # Bring in ID, ID_LIKE, VERSION_ID, VERSION_CODENAME
 . /etc/os-release
-# Get an adjusted ID independant of distro variants
-if [ "${ID}" = "debian" ] || [ "${ID_LIKE}" = "debian" ]; then
-    ADJUSTED_ID="debian"
-elif [[ "${ID}" = "rhel" || "${ID}" = "fedora" || "${ID}" = "mariner" || "${ID_LIKE}" = *"rhel"* || "${ID_LIKE}" = *"fedora"* || "${ID_LIKE}" = *"mariner"* ]]; then
-    ADJUSTED_ID="rhel"
-elif [ "${ID}" = "alpine" ]; then
-    ADJUSTED_ID="alpine"
-else
-    echo "Linux distro ${ID} not supported."
-    exit 1
-fi
 
-# Install packages for appropriate OS
-if [ "${PACKAGES_ALREADY_INSTALLED}" != "true" ]; then
-    case "${ADJUSTED_ID}" in
-        "debian")
-            install_debian_packages
-            ;;
-        "rhel")
-            install_redhat_packages
-            ;;
-        "alpine")
-            install_alpine_packages
-            ;;
-    esac
-    PACKAGES_ALREADY_INSTALLED="true"
-fi
+# Get an adjusted ID independant of distro variants
+ADJUSTED_ID="debian"
+export DEBIAN_FRONTEND=noninteractive
+
+local package_list="apt-utils \
+    locales \
+    sudo \
+    git \
+    init-system-helpers"
+
+# Install the list of packages
+echo "Packages to verify are installed: ${package_list}"
+rm -rf /var/lib/apt/lists/*
+apt-get update -y
+apt-get -y install --no-install-recommends ${package_list}
+
+# Clean up
+apt-get -y clean 
+rm -rf /var/lib/apt/lists/*
 
 # Create or update a non-root user to match UID/GID.
 group_name="${USERNAME}"
