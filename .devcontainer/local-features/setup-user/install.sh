@@ -12,11 +12,6 @@ set -e
 
 FEATURE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-# Bring in ID, ID_LIKE, VERSION_ID, VERSION_CODENAME
-. /etc/os-release
-
-# Get an adjusted ID independant of distro variants
-ADJUSTED_ID="debian"
 export DEBIAN_FRONTEND=noninteractive
 
 package_list="apt-utils \
@@ -37,7 +32,7 @@ group_name="${USERNAME}"
 groupadd --gid $USER_GID $USERNAME
 useradd -s /bin/bash --uid $USER_UID --gid $USERNAME -m $USERNAME
 
-# Add add sudo support for non-root user
+# Add sudo support for non-root user
 if [ "${USERNAME}" != "root" ] && [ "${EXISTING_NON_ROOT_USER}" != "${USERNAME}" ]; then
     echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME
     chmod 0440 /etc/sudoers.d/$USERNAME
@@ -55,7 +50,6 @@ cat "${FEATURE_DIR}/scripts/rc_snippet.sh" >> ${global_rc_path}
 cat "${FEATURE_DIR}/scripts/bash_theme_snippet.sh" >> "${user_rc_path}/.bashrc"
 cat "${FEATURE_DIR}/scripts/bash_theme_snippet.sh" >> "/root/.bashrc"
 chown ${USERNAME}:${group_name} "${user_rc_path}/.bashrc"
-RC_SNIPPET_ALREADY_ADDED="true"
 
 # ****************************
 # ** Utilities and commands **
