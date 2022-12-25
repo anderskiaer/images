@@ -8,16 +8,7 @@ USERNAME="codespace"
 USER_UID="1000"
 USER_GID="1000"
 
-set -e
-
-INSTALL_ZSH="${INSTALLZSH:-"true"}"
-CONFIGURE_ZSH_AS_DEFAULT_SHELL="${CONFIGUREZSHASDEFAULTSHELL:-"false"}"
-INSTALL_OH_MY_ZSH="${INSTALLOHMYZSH:-"true"}"
-UPGRADE_PACKAGES="${UPGRADEPACKAGES:-"true"}"
-USERNAME="${USERNAME:-"automatic"}"
-USER_UID="${USERUID:-"automatic"}"
-USER_GID="${USERGID:-"automatic"}"
-ADD_NON_FREE_PACKAGES="${NONFREEPACKAGES:-"false"}"
+set -eux
 
 MARKER_FILE="/usr/local/etc/vscode-dev-containers/common"
 
@@ -126,7 +117,6 @@ fi
 
 user_rc_path="/home/${USERNAME}"
 
-
 global_rc_path="/etc/bash.bashrc"
 cat "${FEATURE_DIR}/scripts/rc_snippet.sh" >> ${global_rc_path}
 cat "${FEATURE_DIR}/scripts/bash_theme_snippet.sh" >> "${user_rc_path}/.bashrc"
@@ -148,17 +138,6 @@ fi
 if [ ! -d "/usr/local/etc/vscode-dev-containers" ]; then
     mkdir -p "$(dirname "${MARKER_FILE}")"
 fi
-echo -e "\
-    PACKAGES_ALREADY_INSTALLED=${PACKAGES_ALREADY_INSTALLED}\n\
-    LOCALE_ALREADY_SET=${LOCALE_ALREADY_SET}\n\
-    EXISTING_NON_ROOT_USER=${EXISTING_NON_ROOT_USER}\n\
-    RC_SNIPPET_ALREADY_ADDED=${RC_SNIPPET_ALREADY_ADDED}\n\
-    ZSH_ALREADY_INSTALLED=${ZSH_ALREADY_INSTALLED}" > "${MARKER_FILE}"
-
-echo "Done!"
-
-
-set -eux
 
 # Ensure that login shells get the correct path if the user updated the PATH using ENV.
 rm -f /etc/profile.d/00-restore-env.sh
