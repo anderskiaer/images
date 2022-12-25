@@ -48,7 +48,6 @@ user_rc_path="/home/${USERNAME}"
 global_rc_path="/etc/bash.bashrc"
 cat "${FEATURE_DIR}/scripts/rc_snippet.sh" >> ${global_rc_path}
 cat "${FEATURE_DIR}/scripts/bash_theme_snippet.sh" >> "${user_rc_path}/.bashrc"
-cat "${FEATURE_DIR}/scripts/bash_theme_snippet.sh" >> "/root/.bashrc"
 chown ${USERNAME}:${group_name} "${user_rc_path}/.bashrc"
 
 # ****************************
