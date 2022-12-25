@@ -4,35 +4,23 @@
 # Licensed under the MIT License. See https://go.microsoft.com/fwlink/?linkid=2090316 for license information.
 #-------------------------------------------------------------------------------------------------------------
 
+set -e
+
 USERNAME="codespace"
 USER_UID="1000"
 USER_GID="1000"
 
-set -e
-
-FEATURE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-
 export DEBIAN_FRONTEND=noninteractive
 
-package_list="apt-utils \
-    locales \
-    sudo \
-    git \
-    init-system-helpers"
-
 apt-get update -y
-apt-get -y install --no-install-recommends ${package_list}
-
-# Clean up
+apt-get -y install --no-install-recommends apt-utils locales sudo git init-system-helpers
 apt-get -y clean 
 rm -rf /var/lib/apt/lists/*
 
-# Create or update a non-root user to match UID/GID.
 group_name="${USERNAME}"
 groupadd --gid $USER_GID $USERNAME
 useradd -s /bin/bash --uid $USER_UID --gid $USERNAME -m $USERNAME
 
-# Add sudo support for non-root user
 if [ "${USERNAME}" != "root" ] && [ "${EXISTING_NON_ROOT_USER}" != "${USERNAME}" ]; then
     echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME
     chmod 0440 /etc/sudoers.d/$USERNAME
@@ -43,10 +31,8 @@ fi
 # ** Shell customization section **
 # *********************************
 
+FEATURE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 user_rc_path="/home/${USERNAME}"
-
-global_rc_path="/etc/bash.bashrc"
-cat "${FEATURE_DIR}/scripts/rc_snippet.sh" >> ${global_rc_path}
 cat "${FEATURE_DIR}/scripts/bash_theme_snippet.sh" >> "${user_rc_path}/.bashrc"
 chown ${USERNAME}:${group_name} "${user_rc_path}/.bashrc"
 
