@@ -1,11 +1,7 @@
 {
     "id": "setup-user",
     "name": "Setup user configs",
-    "containerEnv": {
-        "PATH": "/home/codespace/.local/bin:${PATH}"
-    },
     "install": {
-        "app": "",
         "file": "install.sh"
     }
 }

@@ -13,7 +13,12 @@ USER_GID="1000"
 export DEBIAN_FRONTEND=noninteractive
 
 apt-get update -y
-apt-get -y install --no-install-recommends apt-utils locales sudo git init-system-helpers
+apt-get -y install --no-install-recommends \
+    apt-utils \
+    locales \
+    sudo \
+    git \
+    init-system-helpers
 apt-get -y clean 
 rm -rf /var/lib/apt/lists/*
 
