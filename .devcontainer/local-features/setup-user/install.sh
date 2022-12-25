@@ -8,7 +8,7 @@ USERNAME="codespace"
 USER_UID="1000"
 USER_GID="1000"
 
-set -eux
+set -e
 
 MARKER_FILE="/usr/local/etc/vscode-dev-containers/common"
 
