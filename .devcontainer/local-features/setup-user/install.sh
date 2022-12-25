@@ -14,7 +14,7 @@ export DEBIAN_FRONTEND=noninteractive
 
 apt-get update -y
 apt-get -y install --no-install-recommends \
-    sudo \
+    sudo
 apt-get -y clean 
 rm -rf /var/lib/apt/lists/*
 
