@@ -29,38 +29,6 @@ install_debian_packages() {
     export DEBIAN_FRONTEND=noninteractive
 
     local package_list="apt-utils \
-        openssh-client \
-        gnupg2 \
-        dirmngr \
-        iproute2 \
-        procps \
-        lsof \
-        htop \
-        net-tools \
-        psmisc \
-        curl \
-        tree \
-        wget \
-        rsync \
-        ca-certificates \
-        unzip \
-        bzip2 \
-        zip \
-        nano \
-        vim-tiny \
-        less \
-        jq \
-        lsb-release \
-        apt-transport-https \
-        dialog \
-        libc6 \
-        libgcc1 \
-        libkrb5-3 \
-        libgssapi-krb5-2 \
-        libicu[0-9][0-9] \
-        liblttng-ust[0-9] \
-        libstdc++6 \
-        zlib1g \
         locales \
         sudo \
         ncdu \
