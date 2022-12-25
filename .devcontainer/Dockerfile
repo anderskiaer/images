@@ -11,7 +11,8 @@ ENV SHELL=/bin/bash \
 # Mount for docker-in-docker 
 VOLUME [ "/var/lib/docker" ]
 
-RUN snap install node --classic --channel=14
+RUN curl -fsSL https://deb.nodesource.com/setup_19.x | -E bash - && \
+    apt-get install -y nodejs
 
 # Fire Docker/Moby script
 ENTRYPOINT [ "/usr/local/share/docker-init.sh", "/usr/local/share/ssh-init.sh"]
