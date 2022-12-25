@@ -32,11 +32,7 @@ install_debian_packages() {
         locales \
         sudo \
         ncdu \
-        man-db \
-        strace \
         git \
-        manpages \
-        manpages-dev \
         init-system-helpers"
 
     # Install the list of packages
