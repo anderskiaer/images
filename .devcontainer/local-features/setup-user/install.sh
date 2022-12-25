@@ -144,135 +144,6 @@ install_debian_packages() {
     rm -rf /var/lib/apt/lists/*
 }
 
-# RedHat / RockyLinux / CentOS / Fedora packages
-install_redhat_packages() {
-    local package_list="\
-        openssh-clients \
-        gnupg2 \
-        iproute \
-        procps \
-        lsof \
-        net-tools \
-        psmisc \
-        curl \
-        wget \
-        ca-certificates \
-        rsync \
-        unzip \
-        zip \
-        nano \
-        vim-minimal \
-        less \
-        jq \
-        openssl-libs \
-        krb5-libs \
-        libicu \
-        zlib \
-        sudo \
-        sed \
-        grep \
-        which \
-        man-db \
-        strace"
-
-    # Install OpenSSL 1.0 compat if needed
-    if ${install_cmd} -q list compat-openssl10 >/dev/null 2>&1; then
-        package_list="${package_list} compat-openssl10"
-    fi
-
-    # Install lsb_release if available
-    if ${install_cmd} -q list redhat-lsb-core >/dev/null 2>&1; then
-        package_list="${package_list} redhat-lsb-core"
-    fi
-
-    # Install git if not already installed (may be more recent than distro version)
-    if ! type git > /dev/null 2>&1; then
-        package_list="${package_list} git"
-    fi
-
-    # Install zsh if needed
-    if [ "${INSTALL_ZSH}" = "true" ] && ! type zsh > /dev/null 2>&1; then
-        package_list="${package_list} zsh"
-    fi
-
-    local install_cmd=dnf
-    if ! type dnf > /dev/null 2>&1; then
-        install_cmd=yum
-    fi
-    ${install_cmd} -y install ${package_list}
-
-    # Get to latest versions of all packages
-    if [ "${UPGRADE_PACKAGES}" = "true" ]; then
-        ${install_cmd} upgrade -y
-    fi
-}
-
-# Alpine Linux packages
-install_alpine_packages() {
-    apk update
-    apk add --no-cache \
-        openssh-client \
-        gnupg \
-        procps \
-        lsof \
-        htop \
-        net-tools \
-        psmisc \
-        curl \
-        wget \
-        rsync \
-        ca-certificates \
-        unzip \
-        zip \
-        nano \
-        vim \
-        less \
-        jq \
-        libgcc \
-        libstdc++ \
-        krb5-libs \
-        libintl \
-        libssl1.1 \
-        lttng-ust \
-        tzdata \
-        userspace-rcu \
-        zlib \
-        sudo \
-        coreutils \
-        sed \
-        grep \
-        which \
-        ncdu \
-        shadow \
-        strace
-
-    # Install man pages - package name varies between 3.12 and earlier versions
-    if apk info man > /dev/null 2>&1; then
-        apk add --no-cache man man-pages
-    else 
-        apk add --no-cache mandoc man-pages
-    fi
-
-    # Install git if not already installed (may be more recent than distro version)
-    if ! type git > /dev/null 2>&1; then
-        apk add --no-cache git
-    fi
-
-    # Install zsh if needed
-    if [ "${INSTALL_ZSH}" = "true" ] && ! type zsh > /dev/null 2>&1; then
-        apk add --no-cache zsh
-    fi
-}
-
-# ******************
-# ** Main section **
-# ******************
-
-if [ "$(id -u)" -ne 0 ]; then
-    echo -e 'Script must be run as root. Use sudo, su, or add "USER root" to your Dockerfile before running this script.'
-    exit 1
-fi
-
 # Load markers to see which steps have already run
 if [ -f "${MARKER_FILE}" ]; then
     echo "Marker file found:"
@@ -315,28 +186,6 @@ if [ "${PACKAGES_ALREADY_INSTALLED}" != "true" ]; then
     PACKAGES_ALREADY_INSTALLED="true"
 fi
 
-# If in automatic mode, determine if a user already exists, if not use vscode
-if [ "${USERNAME}" = "auto" ] || [ "${USERNAME}" = "automatic" ]; then
-    if [ "${_REMOTE_USER}" != "root" ]; then
-        USERNAME="${_REMOTE_USER}"
-    else 
-        USERNAME=""
-        POSSIBLE_USERS=("devcontainer" "vscode" "node" "codespace" "$(awk -v val=1000 -F ":" '$3==val{print $1}' /etc/passwd)")
-        for CURRENT_USER in "${POSSIBLE_USERS[@]}"; do
-            if id -u ${CURRENT_USER} > /dev/null 2>&1; then
-                USERNAME=${CURRENT_USER}
-                break
-            fi
-        done
-        if [ "${USERNAME}" = "" ]; then
-            USERNAME=vscode
-        fi
-    fi
-elif [ "${USERNAME}" = "none" ]; then
-    USERNAME=root
-    USER_UID=0
-    USER_GID=0
-fi
 # Create or update a non-root user to match UID/GID.
 group_name="${USERNAME}"
 if id -u ${USERNAME} > /dev/null 2>&1; then
@@ -413,69 +262,10 @@ if [ "${RC_SNIPPET_ALREADY_ADDED}" != "true" ]; then
     RC_SNIPPET_ALREADY_ADDED="true"
 fi
 
-# Optionally configure zsh and Oh My Zsh!
-if [ "${INSTALL_ZSH}" = "true" ]; then
-    if [ "${ZSH_ALREADY_INSTALLED}" != "true" ]; then
-        if [ "${ADJUSTED_ID}" = "rhel" ]; then
-             global_rc_path="/etc/zshrc"
-        else
-            global_rc_path="/etc/zsh/zshrc"
-        fi
-        cat "${FEATURE_DIR}/scripts/rc_snippet.sh" >> /etc/zshrc
-        ZSH_ALREADY_INSTALLED="true"
-    fi
-
-    if [ "${CONFIGURE_ZSH_AS_DEFAULT_SHELL}" == "true" ]; then
-        chsh --shell /bin/zsh ${USERNAME}
-    fi
-
-    # Adapted, simplified inline Oh My Zsh! install steps that adds, defaults to a codespaces theme.
-    # See https://github.com/ohmyzsh/ohmyzsh/blob/master/tools/install.sh for official script.
-    oh_my_install_dir="${user_rc_path}/.oh-my-zsh"
-    if [ ! -d "${oh_my_install_dir}" ] && [ "${INSTALL_OH_MY_ZSH}" = "true" ]; then
-        template_path="${oh_my_install_dir}/templates/zshrc.zsh-template"
-        user_rc_file="${user_rc_path}/.zshrc"
-        umask g-w,o-w
-        mkdir -p ${oh_my_install_dir}
-        git clone --depth=1 \
-            -c core.eol=lf \
-            -c core.autocrlf=false \
-            -c fsck.zeroPaddedFilemode=ignore \
-            -c fetch.fsck.zeroPaddedFilemode=ignore \
-            -c receive.fsck.zeroPaddedFilemode=ignore \
-            "https://github.com/ohmyzsh/ohmyzsh" "${oh_my_install_dir}" 2>&1
-        echo -e "$(cat "${template_path}")\nDISABLE_AUTO_UPDATE=true\nDISABLE_UPDATE_PROMPT=true" > ${user_rc_file}
-        sed -i -e 's/ZSH_THEME=.*/ZSH_THEME="devcontainers"/g' ${user_rc_file}
-
-        # Add Dev Containers theme
-        mkdir -p ${oh_my_install_dir}/custom/themes
-        cp -f "${FEATURE_DIR}/scripts/devcontainers.zsh-theme" "${oh_my_install_dir}/custom/themes/devcontainers.zsh-theme"
-        ln -s "${oh_my_install_dir}/custom/themes/devcontainers.zsh-theme" "${oh_my_install_dir}/custom/themes/codespaces.zsh-theme"
-
-        # Shrink git while still enabling updates
-        cd "${oh_my_install_dir}"
-        git repack -a -d -f --depth=1 --window=1
-        # Copy to non-root user if one is specified
-        if [ "${USERNAME}" != "root" ]; then
-            cp -rf "${user_rc_file}" "${oh_my_install_dir}" /root
-            chown -R ${USERNAME}:${group_name} "${oh_my_install_dir}" "${user_rc_file}"
-        fi
-    fi
-fi
 
 # ****************************
 # ** Utilities and commands **
 # ****************************
-
-# code shim, it fallbacks to code-insiders if code is not available
-cp -f "${FEATURE_DIR}/bin/code" /usr/local/bin/
-chmod +x /usr/local/bin/code
-
-# systemctl shim for Debian/Ubuntu - tells people to use 'service' if systemd is not running
-if [ "${ADJUSTED_ID}" = "debian" ]; then
-    cp -f "${FEATURE_DIR}/bin/systemctl" /usr/local/bin/systemctl
-    chmod +x /usr/local/bin/systemctl
-fi
 
 # Persist image metadata info, script if meta.env found in same directory
 if [ -f "/usr/local/etc/vscode-dev-containers/meta.env" ]; then
@@ -498,11 +288,6 @@ echo "Done!"
 
 
 set -eux
-
-if [ "$(id -u)" -ne 0 ]; then
-    echo -e 'Script must be run as root. Use sudo, su, or add "USER root" to your Dockerfile before running this script.'
-    exit 1
-fi
 
 # Ensure that login shells get the correct path if the user updated the PATH using ENV.
 rm -f /etc/profile.d/00-restore-env.sh
