@@ -11,7 +11,7 @@ ENV SHELL=/bin/bash \
 # Mount for docker-in-docker 
 VOLUME [ "/var/lib/docker" ]
 
-RUN sudo snap install node --classic --channel=14
+RUN snap install node --classic --channel=14
 
 # Fire Docker/Moby script
 ENTRYPOINT [ "/usr/local/share/docker-init.sh", "/usr/local/share/ssh-init.sh"]
