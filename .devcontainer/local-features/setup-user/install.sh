@@ -66,71 +66,16 @@ install_debian_packages() {
         ncdu \
         man-db \
         strace \
+        git \
         manpages \
         manpages-dev \
         init-system-helpers"
-        
-    # Needed for adding manpages-posix and manpages-posix-dev which are non-free packages in Debian
-    if [ "${ADD_NON_FREE_PACKAGES}" = "true" ]; then
-        # Bring in variables from /etc/os-release like VERSION_CODENAME
-        sed -i -E "s/deb http:\/\/(deb|httpredir)\.debian\.org\/debian ${VERSION_CODENAME} main/deb http:\/\/\1\.debian\.org\/debian ${VERSION_CODENAME} main contrib non-free/" /etc/apt/sources.list
-        sed -i -E "s/deb-src http:\/\/(deb|httredir)\.debian\.org\/debian ${VERSION_CODENAME} main/deb http:\/\/\1\.debian\.org\/debian ${VERSION_CODENAME} main contrib non-free/" /etc/apt/sources.list
-        sed -i -E "s/deb http:\/\/(deb|httpredir)\.debian\.org\/debian ${VERSION_CODENAME}-updates main/deb http:\/\/\1\.debian\.org\/debian ${VERSION_CODENAME}-updates main contrib non-free/" /etc/apt/sources.list
-        sed -i -E "s/deb-src http:\/\/(deb|httpredir)\.debian\.org\/debian ${VERSION_CODENAME}-updates main/deb http:\/\/\1\.debian\.org\/debian ${VERSION_CODENAME}-updates main contrib non-free/" /etc/apt/sources.list
-        sed -i "s/deb http:\/\/security\.debian\.org\/debian-security ${VERSION_CODENAME}\/updates main/deb http:\/\/security\.debian\.org\/debian-security ${VERSION_CODENAME}\/updates main contrib non-free/" /etc/apt/sources.list
-        sed -i "s/deb-src http:\/\/security\.debian\.org\/debian-security ${VERSION_CODENAME}\/updates main/deb http:\/\/security\.debian\.org\/debian-security ${VERSION_CODENAME}\/updates main contrib non-free/" /etc/apt/sources.list
-        sed -i "s/deb http:\/\/deb\.debian\.org\/debian ${VERSION_CODENAME}-backports main/deb http:\/\/deb\.debian\.org\/debian ${VERSION_CODENAME}-backports main contrib non-free/" /etc/apt/sources.list 
-        sed -i "s/deb-src http:\/\/deb\.debian\.org\/debian ${VERSION_CODENAME}-backports main/deb http:\/\/deb\.debian\.org\/debian ${VERSION_CODENAME}-backports main contrib non-free/" /etc/apt/sources.list
-        # Handle bullseye location for security https://www.debian.org/releases/bullseye/amd64/release-notes/ch-information.en.html
-        sed -i "s/deb http:\/\/security\.debian\.org\/debian-security ${VERSION_CODENAME}-security main/deb http:\/\/security\.debian\.org\/debian-security ${VERSION_CODENAME}-security main contrib non-free/" /etc/apt/sources.list
-        sed -i "s/deb-src http:\/\/security\.debian\.org\/debian-security ${VERSION_CODENAME}-security main/deb http:\/\/security\.debian\.org\/debian-security ${VERSION_CODENAME}-security main contrib non-free/" /etc/apt/sources.list
-        echo "Running apt-get update..."
-        package_list="${package_list} manpages-posix manpages-posix-dev"
-    fi
-
-    # Include libssl1.1 if available
-    if [[ ! -z $(apt-cache --names-only search ^libssl1.1$) ]]; then
-        package_list="${package_list} libssl1.1"
-    fi
-
-    # Include libssl3 if available
-    if [[ ! -z $(apt-cache --names-only search ^libssl3$) ]]; then
-        package_list="${package_list} libssl3"
-    fi
-
-    # Include appropriate version of libssl1.0.x if available
-    local libssl_package=$(dpkg-query -f '${db:Status-Abbrev}\t${binary:Package}\n' -W 'libssl1\.0\.?' 2>&1 || echo '')
-    if [ "$(echo "$libssl_package" | grep -o 'libssl1\.0\.[0-9]:' | uniq | sort | wc -l)" -eq 0 ]; then
-        if [[ ! -z $(apt-cache --names-only search ^libssl1.0.2$) ]]; then
-            # Debian 9
-            package_list="${package_list} libssl1.0.2"
-        elif [[ ! -z $(apt-cache --names-only search ^libssl1.0.0$) ]]; then
-            # Ubuntu 18.04
-            package_list="${package_list} libssl1.0.0"
-        fi
-    fi
-
-    # Include git if not already installed (may be more recent than distro version)
-    if ! type git > /dev/null 2>&1; then
-        package_list="${package_list} git"
-    fi
 
     # Install the list of packages
     echo "Packages to verify are installed: ${package_list}"
     rm -rf /var/lib/apt/lists/*
     apt-get update -y
     apt-get -y install --no-install-recommends ${package_list} 2> >( grep -v 'debconf: delaying package configuration, since apt-utils is not installed' >&2 )
-
-    # Install zsh (and recommended packages) if needed
-    if [ "${INSTALL_ZSH}" = "true" ] && ! type zsh > /dev/null 2>&1; then
-        apt-get install -y zsh
-    fi
-
-    # Get to latest versions of all packages
-    if [ "${UPGRADE_PACKAGES}" = "true" ]; then
-        apt-get -y upgrade --no-install-recommends
-        apt-get autoremove -y
-    fi
 
     # Ensure at least the en_US.UTF-8 UTF-8 locale is available = common need for both applications and things like the agnoster ZSH theme.
     if [ "${LOCALE_ALREADY_SET}" != "true" ] && ! grep -o -E '^\s*en_US.UTF-8\s+UTF-8' /etc/locale.gen > /dev/null; then
