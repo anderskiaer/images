@@ -30,7 +30,7 @@ fi
 ADJUSTED_ID="debian"
 export DEBIAN_FRONTEND=noninteractive
 
-local package_list="apt-utils \
+package_list="apt-utils \
     locales \
     sudo \
     git \
