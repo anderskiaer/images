@@ -5,7 +5,8 @@
     },
     "features": {
         "ghcr.io/devcontainers/features/node:1": {
-            "version": "16"
+            "version": "16",
+            "nodeGypDependencies": false
         },
         "ghcr.io/devcontainers/features/docker-in-docker:2": {
             "version": "latest"
@@ -23,16 +24,11 @@
     // Use 'forwardPorts' to make a list of ports inside the container available locally.
     // "forwardPorts": [],
 
-    // Configure tool-specific properties.
     "customizations": {
-        // Configure properties specific to VS Code.
         "vscode": {
             "settings": {
                 "workbench.colorTheme": "Default Dark+"
-            },
-            "extensions": [
-                "GitHub.vscode-pull-request-github"
-            ]
+            }
         }
     }
 }

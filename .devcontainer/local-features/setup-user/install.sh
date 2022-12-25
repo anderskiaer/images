@@ -46,8 +46,8 @@ chown -R ${USERNAME}:${USERNAME} ${HOME_DIR}
 chmod -R g+r+w "${HOME_DIR}"
 find "${HOME_DIR}" -type d | xargs -n 1 chmod g+s
 
-OPT_DIR="/opt/"
-chmod -R g+r+w "${OPT_DIR}"
-find "${OPT_DIR}" -type d | xargs -n 1 chmod g+s
+NVM_DIR="/usr/local/share/nvm"
+chmod -R g+r+w "${NVM_DIR}"
+find "${NVM_DIR}" -type d | xargs -n 1 chmod g+s
 
 echo "Done!"
