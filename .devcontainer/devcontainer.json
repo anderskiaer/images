@@ -4,17 +4,17 @@
         "context": "."
     },
     "features": {
-        "ghcr.io/devcontainers/features/node:1": {
-            "version": "16",
-            "nodeGypDependencies": false
-        },
+        // "ghcr.io/devcontainers/features/node:1": {
+        //     "version": "16",
+        //     "nodeGypDependencies": false
+        // },
         "ghcr.io/devcontainers/features/docker-in-docker:2": {
             "version": "latest"
         },
         "./local-features/setup-user": "latest"
     },
     "overrideFeatureInstallOrder": [
-        "ghcr.io/devcontainers/features/node",
+        // "ghcr.io/devcontainers/features/node",
         "ghcr.io/devcontainers/features/docker-in-docker",
         "./local-features/setup-user"
     ],

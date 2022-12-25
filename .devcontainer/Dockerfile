@@ -5,13 +5,14 @@
 
 FROM ubuntu:focal
 
-# Default to bash shell (other shells available at /usr/bin/fish and /usr/bin/zsh)
 ENV SHELL=/bin/bash \
     DOCKER_BUILDKIT=1
 
 # Mount for docker-in-docker 
 VOLUME [ "/var/lib/docker" ]
 
-# Fire Docker/Moby script if needed
+RUN sudo snap install node --classic --channel=14
+
+# Fire Docker/Moby script
 ENTRYPOINT [ "/usr/local/share/docker-init.sh", "/usr/local/share/ssh-init.sh"]
 CMD [ "sleep", "infinity" ]
